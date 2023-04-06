@@ -11,7 +11,6 @@ import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 contract Duck is ERC721Upgradeable {
 
     using EnumerableSet for EnumerableSet.UintSet;
-    using EnumerableSet for EnumerableSet.AddressSet;
     using Counters for Counters.Counter;
 
     string public baseURL;
@@ -23,6 +22,7 @@ contract Duck is ERC721Upgradeable {
     address private _owner;
     address private _royaltiesAddr;
     mapping(address => EnumerableSet.UintSet) private _holderTokens;
+    EnumerableSet.UintSet private _listedTokens;
 
     struct Duckling {
         uint256 tokenId;
@@ -58,15 +58,35 @@ contract Duck is ERC721Upgradeable {
 
     function listToken(uint256 tokenId, uint256 price) public {
         require(_isApprovedOrOwner(_msgSender(), tokenId), "not the owner");
+        require(!_listedTokens.contains(tokenId), "token already listed");
         require(price > 0, "Price must be greater than 0");
         ducklings[tokenId].forSale = true;
         ducklings[tokenId].price = price;
+        _listedTokens.add(tokenId);
     }
 
     function unlistToken(uint256 tokenId) public {
         require(_isApprovedOrOwner(_msgSender(), tokenId), "not the owner");
+        require(_listedTokens.contains(tokenId), "token not listed");
         ducklings[tokenId].forSale = false;
         ducklings[tokenId].price = 0;
+        _listedTokens.remove(tokenId);
+    }
+
+    function getListedTokens() public view returns (uint256[] memory) {
+        uint256[] memory listedTokens = new uint256[](_listedTokens.length());
+        for (uint256 i = 0; i < _listedTokens.length(); i++) {
+            listedTokens[i] = _listedTokens.at(i);
+        }
+        return listedTokens;
+    }
+
+    function getUserTokens(address _wallet) public view returns (uint256[] memory) {
+        uint256[] memory userTokens = new uint256[](_holderTokens[_wallet].length());
+        for (uint256 i = 0; i < _holderTokens[_wallet].length(); i++) {
+            userTokens[i] = _holderTokens[_wallet].at(i);
+        }
+        return userTokens;
     }
 
     function tokenURI(uint256 tokenId) public view override(ERC721Upgradeable) returns (string memory) {
