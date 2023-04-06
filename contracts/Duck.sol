@@ -97,4 +97,31 @@ contract Duck is ERC721Upgradeable {
         super._burn(tokenId);
     }
 
+    function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal virtual override(ERC721Upgradeable) {
+        super._beforeTokenTransfer(from, to, tokenId, 1);
+        Duckling memory duckling = ducklings[tokenId];
+        duckling.owner = to;
+        duckling.forSale = false;
+        ducklings[tokenId] = duckling;
+
+        if (from == address(0)) {
+            // new token has been minted
+        } else if (from != to) {
+            _removeTokenFromOwnerEnumeration(from, tokenId);
+        }
+        if (to == address(0)) {
+            // token has been burned
+        } else if (to != from) {
+            _addTokenToOwnerEnumeration(to, tokenId);
+        }
+    }
+
+    function _addTokenToOwnerEnumeration(address to, uint256 tokenId) private {
+        _holderTokens[to].add(tokenId);
+    }
+
+    function _removeTokenFromOwnerEnumeration(address from, uint256 tokenId) private {
+        _holderTokens[from].remove(tokenId);
+    }
+
 }
