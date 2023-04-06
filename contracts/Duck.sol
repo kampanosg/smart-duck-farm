@@ -11,6 +11,7 @@ import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 contract Duck is ERC721Upgradeable {
 
     using EnumerableSet for EnumerableSet.UintSet;
+    using EnumerableSet for EnumerableSet.AddressSet;
     using Counters for Counters.Counter;
 
     string public baseURL;
@@ -55,12 +56,25 @@ contract Duck is ERC721Upgradeable {
         return _tokenIdCounter.current();
     }
 
-    function _burn(uint256 tokenId) internal override(ERC721Upgradeable) {
-        super._burn(tokenId);
+    function listToken(uint256 tokenId, uint256 price) public {
+        require(_isApprovedOrOwner(_msgSender(), tokenId), "not the owner");
+        require(price > 0, "Price must be greater than 0");
+        ducklings[tokenId].forSale = true;
+        ducklings[tokenId].price = price;
+    }
+
+    function unlistToken(uint256 tokenId) public {
+        require(_isApprovedOrOwner(_msgSender(), tokenId), "not the owner");
+        ducklings[tokenId].forSale = false;
+        ducklings[tokenId].price = 0;
     }
 
     function tokenURI(uint256 tokenId) public view override(ERC721Upgradeable) returns (string memory) {
         return super.tokenURI(tokenId);
+    }
+
+    function _burn(uint256 tokenId) internal override(ERC721Upgradeable) {
+        super._burn(tokenId);
     }
 
 }
