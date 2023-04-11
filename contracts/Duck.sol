@@ -46,21 +46,21 @@ contract Duck is ERC721Upgradeable {
 
         _tokenIdCounter.increment();
         uint256 nextTokenId = _tokenIdCounter.current();
-        _safeMint(msg.sender, nextTokenId);
-        ducklings[nextTokenId] = Duckling(nextTokenId, msg.sender, msg.sender, 0, false, 0);
+        _safeMint(_msgSender(), nextTokenId);
+        ducklings[nextTokenId] = Duckling(nextTokenId, _msgSender(), _msgSender(), 0, false, 0);
     }
 
     function buyToken(uint256 tokenId) public payable {
         address tokenOwner = ownerOf(tokenId);
-        require(tokenOwner != address(0));
-        require(tokenOwner != msg.sender);
+        require(tokenOwner != address(0), "hackz");
+        require(tokenOwner != _msgSender(), "already the owner");
         require(_listedTokens.contains(tokenId), "token not listed");
-        require(msg.value == ducklings[tokenId].price, "not enough fee");
+        require(msg.value == ducklings[tokenId].price, "wrong fee");
 
         Duckling memory duckling = ducklings[tokenId];
         payable(duckling.owner).transfer(msg.value);
 
-        safeTransferFrom(duckling.owner, msg.sender, tokenId);
+        _transfer(duckling.owner, _msgSender(), tokenId);
     }
 
     function totalSupply() public view returns (uint256) {
