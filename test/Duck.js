@@ -1,26 +1,33 @@
 const { assert, expect } = require("chai");
 const { ethers } = require("hardhat");
 
-describe("Duck Contract", function()
-{
-    it("totalSupply - should return 0 when there are no minted items", async function()
-    {
+describe("Duck Contract - mint", () => {
+
+    var duckContract = null;
+
+    beforeEach(async () => {
+        const [owner, otherAccount] = await ethers.getSigners();
+
         const Duck = await ethers.getContractFactory("Duck");
-        const duckContract = await Duck.deploy();
+        duckContract = await Duck.deploy(
+             owner.address,
+            "https://duck.com/",
+            5,
+        );
         await duckContract.deployed();
+    })
 
-        const totalSupply = await duckContract.totalSupply();
-        expect(totalSupply).to.be.equal(0);
-    });
-
-    it("totalSupply - should return correct number when tokens have been minted", async function()
-    {
-        const Duck = await ethers.getContractFactory("Duck");
-        const duckContract = await Duck.deploy();
-        await duckContract.deployed();
-
+    it("should mint a new token", async () => {
         await duckContract.mint();
         const totalSupply = await duckContract.totalSupply();
         expect(totalSupply).to.be.equal(1);
+    });
+
+    it("should revert when fee is too low", async () => {
+        await expect(duckContract.mint({value: ethers.utils.parseEther("0.5")})).to.be.revertedWith("wrong fee");
+    });
+
+    it("should revert when fee is too high", async () => {
+        await expect(duckContract.mint({value: ethers.utils.parseEther("1.5")})).to.be.revertedWith("wrong fee");
     });
 });

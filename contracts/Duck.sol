@@ -16,12 +16,10 @@ contract Duck is ERC721Upgradeable {
     string public baseURL;
     uint256 public mintFeeAmount;
     uint256 public constant maxSupply = 10000;
-    uint256 public royaltiesPercentage;
     mapping(uint256 => Duckling) public ducklings;
 
     Counters.Counter private _tokenIdCounter;
     address private _owner;
-    address private _royaltiesAddress;
     mapping(address => EnumerableSet.UintSet) private _holderTokens;
     EnumerableSet.UintSet private _listedTokens;
     EnumerableSet.UintSet private _allTokens;
@@ -35,19 +33,16 @@ contract Duck is ERC721Upgradeable {
         uint256 weight;
     }
 
-    function initialize(address _nftOwner, string memory _baseURL, uint256 _royaltyPercentage) initializer public {
+    function initialize(address _nftOwner, string memory _baseURL) initializer public {
         __ERC721_init("Duck NFT", "DCK");
         mintFeeAmount = 1000000000000000000;
         baseURL = _baseURL;
         _owner = _nftOwner;
-        royaltiesPercentage = _royaltyPercentage;
-        _royaltiesAddress = _nftOwner;
     }
 
     function mint() public payable {
-        require(_tokenIdCounter.current() < maxSupply, "Max supply reached");
-        require(msg.value == mintFeeAmount, "Not enough fee");
-        payable(_royaltiesAddress).transfer(msg.value);
+        require(_tokenIdCounter.current() < maxSupply, "max supply reached");
+        require(msg.value == mintFeeAmount, "wrong fee");
 
         _tokenIdCounter.increment();
         uint256 nextTokenId = _tokenIdCounter.current();
@@ -63,11 +58,7 @@ contract Duck is ERC721Upgradeable {
         require(msg.value == ducklings[tokenId].price, "not enough fee");
 
         Duckling memory duckling = ducklings[tokenId];
-        uint256 amount = msg.value;
-        uint256 royaltiesAmount = (amount * royaltiesPercentage) / 100;
-        uint256 sellerAmount = amount - royaltiesAmount;
-        payable(_royaltiesAddress).transfer(royaltiesAmount);
-        payable(duckling.owner).transfer(sellerAmount);
+        payable(duckling.owner).transfer(msg.value);
 
         safeTransferFrom(duckling.owner, msg.sender, tokenId);
     }
@@ -117,26 +108,27 @@ contract Duck is ERC721Upgradeable {
         super._burn(tokenId);
     }
 
-    // function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal virtual override(ERC721Upgradeable) {
-    //     super._beforeTokenTransfer(from, to, tokenId, 1);
-    //     Duckling memory duckling = ducklings[tokenId];
-    //     duckling.owner = to;
-    //     duckling.forSale = false;
-    //     ducklings[tokenId] = duckling;
+    function _beforeTokenTransfer(address from, address to, uint256 tokenId, uint256 batchSize) internal virtual override(ERC721Upgradeable) {
+        super._beforeTokenTransfer(from, to, tokenId, batchSize);
 
-    //     if (from == address(0)) {
-    //         // new token has been minted
-    //         _allTokens.add(tokenId);
-    //     } else if (from != to) {
-    //         _removeTokenFromOwnerEnumeration(from, tokenId);
-    //     }
-    //     if (to == address(0)) {
-    //         // token has been burned
-    //         _allTokens.remove(tokenId);
-    //     } else if (to != from) {
-    //         _addTokenToOwnerEnumeration(to, tokenId);
-    //     }
-    // }
+        Duckling memory duckling = ducklings[tokenId];
+        duckling.owner = to;
+        duckling.forSale = false;
+        ducklings[tokenId] = duckling;
+
+        if (from == address(0)) {
+            // new token has been minted
+            _allTokens.add(tokenId);
+        } else if (from != to) {
+            _removeTokenFromOwnerEnumeration(from, tokenId);
+        }
+        if (to == address(0)) {
+            // token has been burned
+            _allTokens.remove(tokenId);
+        } else if (to != from) {
+            _addTokenToOwnerEnumeration(to, tokenId);
+        }
+    }
 
     function _addTokenToOwnerEnumeration(address to, uint256 tokenId) private {
         _holderTokens[to].add(tokenId);
