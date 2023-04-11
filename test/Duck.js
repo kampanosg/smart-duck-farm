@@ -218,7 +218,7 @@ describe("Duck Contract - totalSupply", () => {
     });
 });
 
-describe("Duckling Contract - getDuckling", () => {
+describe("Duck Contract - getDuckling", () => {
     let duckContract = null;
     let owner = null;
     let other = null;
