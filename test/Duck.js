@@ -6,14 +6,8 @@ describe("Duck Contract - mint", () => {
     var duckContract = null;
 
     beforeEach(async () => {
-        const [owner, otherAccount] = await ethers.getSigners();
-
         const Duck = await ethers.getContractFactory("Duck");
-        duckContract = await Duck.deploy(
-             owner.address,
-            "https://duck.com/",
-            5,
-        );
+        duckContract = await Duck.deploy();
         await duckContract.deployed();
     })
 
@@ -29,5 +23,26 @@ describe("Duck Contract - mint", () => {
 
     it("should revert when fee is too high", async () => {
         await expect(duckContract.mint({value: ethers.utils.parseEther("1.5")})).to.be.revertedWith("wrong fee");
+    });
+});
+
+describe("Duck Contract - totalSupply", () => {
+
+    var duckContract = null;
+
+    beforeEach(async () => {
+        const Duck = await ethers.getContractFactory("Duck");
+        duckContract = await Duck.deploy();
+        await duckContract.deployed();
+    })
+
+    it("should return the supply", async () => {
+        await duckContract.mint();
+        await duckContract.mint();
+        expect(await duckContract.totalSupply()).to.be.equal(2);
+    });
+
+    it("should return 0 when no token is minted", async () => {
+        expect(await duckContract.totalSupply()).to.be.equal(await duckContract.totalSupply());
     });
 });
