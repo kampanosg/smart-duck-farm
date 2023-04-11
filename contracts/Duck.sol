@@ -63,14 +63,10 @@ contract Duck is ERC721Upgradeable {
         _transfer(duckling.owner, _msgSender(), tokenId);
     }
 
-    function totalSupply() public view returns (uint256) {
-        return _allTokens.length();
-    }
-
     function listToken(uint256 tokenId, uint256 price) public {
         require(_isApprovedOrOwner(_msgSender(), tokenId), "not the owner");
         require(!_listedTokens.contains(tokenId), "token already listed");
-        require(price > 0, "Price must be greater than 0");
+        require(price > 0, "wrong price");
         ducklings[tokenId].forSale = true;
         ducklings[tokenId].price = price;
         _listedTokens.add(tokenId);
@@ -82,6 +78,14 @@ contract Duck is ERC721Upgradeable {
         ducklings[tokenId].forSale = false;
         ducklings[tokenId].price = 0;
         _listedTokens.remove(tokenId);
+    }
+
+    function totalSupply() public view returns (uint256) {
+        return _allTokens.length();
+    }
+
+    function getDuckling(uint256 tokenId) public view returns (Duckling memory) {
+        return ducklings[tokenId];
     }
 
     function getListedTokens() public view returns (uint256[] memory) {
@@ -114,6 +118,7 @@ contract Duck is ERC721Upgradeable {
         Duckling memory duckling = ducklings[tokenId];
         duckling.owner = to;
         duckling.forSale = false;
+        duckling.price = 0;
         ducklings[tokenId] = duckling;
 
         if (from == address(0)) {

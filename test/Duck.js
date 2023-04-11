@@ -86,6 +86,115 @@ describe("Duck Contract - buyToken", () => {
 
         expect(await duckContract.getListedTokens()).to.not.contain(1);
     });
+
+    it("should reset token price and listed status", async () => {
+        await duckContract.listToken(1, ethers.utils.parseEther("1").toBigInt());
+        await duckContract.connect(buyer)
+            .buyToken(1, {value: ethers.utils.parseEther("1")});
+
+        const duckling = await duckContract.getDuckling(1);
+
+        expect(duckling.price).to.be.equal(0);
+        expect(duckling.forSale).to.be.false;
+    })
+});
+
+describe("Duck Contract - listToken", () => {
+
+    let duckContract = null;
+    let owner = null;
+    let other = null;
+
+    beforeEach(async () => {
+        [owner, other] = await ethers.getSigners();
+        const Duck = await ethers.getContractFactory("Duck");
+        duckContract = await Duck.deploy();
+        await duckContract.deployed();
+        await duckContract.mint();
+    });
+
+    it("should revert when token is not owned by sender", async () => {
+        await expect(duckContract.connect(other).listToken(1, ethers.utils.parseEther("1").toBigInt()))
+            .to.be.revertedWith("not the owner");
+    });
+
+    it("should revert when token is already listed", async () => {
+        await duckContract.listToken(1, ethers.utils.parseEther("1").toBigInt());
+        await expect(duckContract.listToken(1, ethers.utils.parseEther("1").toBigInt()))
+            .to.be.revertedWith("token already listed");
+    });
+
+    it("should revert when token does not exist", async () => {
+        await expect(duckContract.listToken(69, ethers.utils.parseEther("1").toBigInt()))
+            .to.be.revertedWith("ERC721: invalid token ID");
+    });
+
+    it("should revert when price is 0", async () => {
+        await expect(duckContract.listToken(1, 0))
+            .to.be.revertedWith("wrong price");
+    });
+
+    it("should be returned in listed tokens", async () => {
+        await duckContract.listToken(1, ethers.utils.parseEther("1").toBigInt());
+        let listedTokens = await duckContract.getListedTokens();
+        expect(listedTokens.length).to.be.equal(1);
+    })
+
+    it("should update token attributes after listing", async () => {
+        await duckContract.listToken(1, ethers.utils.parseEther("1").toBigInt());
+        const duckling = await duckContract.getDuckling(1);
+
+        expect(duckling.price).to.be.equal(ethers.utils.parseEther("1").toBigInt());
+        expect(duckling.forSale).to.be.true;
+    });
+
+});
+
+describe("Duck Contract - unlistToken", () => {
+
+    let duckContract = null;
+    let owner = null;
+    let other = null;
+
+    beforeEach(async () => {
+        [owner, other] = await ethers.getSigners();
+        const Duck = await ethers.getContractFactory("Duck");
+        duckContract = await Duck.deploy();
+        await duckContract.deployed();
+        await duckContract.mint();
+    });
+
+    it("should revert when token is not owned by sender", async () => {
+        await expect(duckContract.connect(other).unlistToken(1))
+            .to.be.revertedWith("not the owner");
+    });
+
+    it("should revert when token is not listed", async () => {
+        await expect(duckContract.unlistToken(1))
+            .to.be.revertedWith("token not listed");
+    });
+
+    it("should revert when token does not exist", async () => {
+        await expect(duckContract.unlistToken(69))
+            .to.be.revertedWith("ERC721: invalid token ID");
+    });
+
+    it("should not be returned in listed tokens", async () => {
+        await duckContract.listToken(1, ethers.utils.parseEther("1").toBigInt());
+        await duckContract.unlistToken(1);
+        let listedTokens = await duckContract.getListedTokens();
+        expect(listedTokens.length).to.be.equal(0);
+    });
+
+    it("should update token attributes after unlisting", async () => {
+        await duckContract.listToken(1, ethers.utils.parseEther("1").toBigInt());
+        await duckContract.unlistToken(1);
+        const duckling = await duckContract.getDuckling(1);
+
+        expect(duckling.price).to.be.equal(0);
+        expect(duckling.forSale).to.be.false;
+    });
+
 });
 
 describe("Duck Contract - totalSupply", () => {
