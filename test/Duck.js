@@ -244,3 +244,55 @@ describe("Duckling Contract - getDuckling", () => {
         await expect(duckContract.getDuckling(69)).to.be.revertedWith("invalid token");
     });
 });
+
+describe("Duck Contract - getListedTokens", () => {
+    let duckContract = null;
+    let owner = null;
+    let other = null;
+
+    beforeEach(async () => {
+        [owner, other] = await ethers.getSigners();
+        const Duck = await ethers.getContractFactory("Duck");
+        duckContract = await Duck.deploy();
+        await duckContract.deployed();
+        await duckContract.mint();
+    });
+
+    it("should return the correct tokens", async () => {
+        await duckContract.listToken(1, ethers.utils.parseEther("1").toBigInt());
+        let listedTokens = await duckContract.getListedTokens();
+        expect(listedTokens.length).to.be.equal(1);
+        expect(listedTokens[0]).to.be.equal(1);
+    });
+
+    it("should return an empty array when no token is listed", async () => {
+        let listedTokens = await duckContract.getListedTokens();
+        expect(listedTokens.length).to.be.equal(0);
+    });
+});
+
+describe("Duck Contract - getUserTokens", () => {
+    let duckContract = null;
+    let owner = null;
+    let other = null;
+
+    beforeEach(async () => {
+        [owner, other] = await ethers.getSigners();
+        const Duck = await ethers.getContractFactory("Duck");
+        duckContract = await Duck.deploy();
+        await duckContract.deployed();
+        await duckContract.mint();
+    });
+
+    it("should return the correct tokens", async () => {
+        await duckContract.transferFrom(owner.address, other.address, 1);
+        let userTokens = await duckContract.getUserTokens(other.address);
+        expect(userTokens.length).to.be.equal(1);
+        expect(userTokens[0]).to.be.equal(1);
+    });
+
+    it("should return an empty array when no token is owned by user", async () => {
+        let userTokens = await duckContract.getUserTokens(other.address);
+        expect(userTokens.length).to.be.equal(0);
+    });
+});

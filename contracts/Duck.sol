@@ -1,4 +1,4 @@
-// contracts/MyNFT.sol
+// contracts/Duck.sol
 // SPDX-License-Identifier: MIT
 // a mutha duckin' upgradeable NFT contract
 pragma solidity ^0.8.0;
