@@ -217,3 +217,30 @@ describe("Duck Contract - totalSupply", () => {
         expect(await duckContract.totalSupply()).to.be.equal(await duckContract.totalSupply());
     });
 });
+
+describe("Duckling Contract - getDuckling", () => {
+    let duckContract = null;
+    let owner = null;
+    let other = null;
+
+    beforeEach(async () => {
+        [owner, other] = await ethers.getSigners();
+        const Duck = await ethers.getContractFactory("Duck");
+        duckContract = await Duck.deploy();
+        await duckContract.deployed();
+        await duckContract.mint();
+    });
+
+    it("should return the correct attributes", async () => {
+        const duckling = await duckContract.getDuckling(1);
+        expect(duckling.tokenId).to.be.equal(1);
+        expect(duckling.owner).to.be.equal(owner.address);
+        expect(duckling.price).to.be.equal(0);
+        expect(duckling.forSale).to.be.false;
+        expect(duckling.weight).to.be.equal(0);
+    });
+
+    it("should revert when token does not exist", async () => {
+        await expect(duckContract.getDuckling(69)).to.be.revertedWith("invalid token");
+    });
+});

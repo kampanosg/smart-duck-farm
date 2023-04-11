@@ -85,6 +85,7 @@ contract Duck is ERC721Upgradeable {
     }
 
     function getDuckling(uint256 tokenId) public view returns (Duckling memory) {
+        require(_allTokens.contains(tokenId), "invalid token");
         return ducklings[tokenId];
     }
 
