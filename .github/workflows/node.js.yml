@@ -1,27 +1,25 @@
-# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
-
-name: Hardhat Smart Contract Build + Test
-
+name: Hardhat - Build & Test
 on:
   push:
-    branches: [ "master" ]
+    branches: [main]
   pull_request:
-    branches: [ "master" ]
+    branches: [main]
 
 jobs:
-  build:
-
+  tests:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [14.x, 16.x, 18.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
-
     steps:
-    - uses: amine7777/hardhat-action@v1
-    - name: Build
-    - run: npx hardhat build
-    - name: Test
-    - run: npx hardhat test
+      - uses: actions/checkout@v3
+      - name: Install packages
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+      - run: yarn --ignore-scripts
+        shell: bash
+      - name: Create local node and deploy
+        run: |
+          yarn hardhat node &
+          yarn hardhat run scripts/deploy.ts --network localhost
+      - name: Run Tests
+        run: yarn hardhat test
