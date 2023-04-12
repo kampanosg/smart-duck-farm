@@ -1,9 +1,9 @@
 # smart-duck-farm :duck:
 [![Hardhat - Build & Test](https://github.com/kampanosg/smart-duck-farm/actions/workflows/hardhat.yml/badge.svg)](https://github.com/kampanosg/smart-duck-farm/actions/workflows/hardhat.yml)
 
-A $DUCKing NFT that lays `$EGG`. Buy `$FEED` with your `$EGG` and give it to your duckling to make it bigger. A bigger `$DUCK` lays more `$EGG`.
-
 ## Overview
+
+A $DUCKing NFT that lays `$EGG`. Buy `$FEED` with your `$EGG` and give it to your duckling to make it bigger. A bigger `$DUCK` lays more `$EGG`.
 
 ### Model
 The Smart Duck Farm project is inspired by the [chikn.farm](chikn.farm) project and their [tokenomics model](https://docs.chikn.farm/). 
