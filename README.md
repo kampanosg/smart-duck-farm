@@ -1,5 +1,10 @@
 # smart-duck-farm :duck:
+
 [![Hardhat - Build & Test](https://github.com/kampanosg/smart-duck-farm/actions/workflows/hardhat.yml/badge.svg)](https://github.com/kampanosg/smart-duck-farm/actions/workflows/hardhat.yml)
+
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/30287348/231542806-4212e8da-5134-40ad-b196-24f3695a9dd1.png" />
+</p>
 
 ## Overview
 
