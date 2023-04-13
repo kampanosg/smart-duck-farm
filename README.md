@@ -8,7 +8,7 @@
 
 ## Overview
 
-A $DUCKing NFT that lays `$EGG`. Buy `$FEED` with your `$EGG` and give it to your duckling to make it bigger. A bigger `$DUCK` lays more `$EGG`.
+A $DUCKing NFT that lays `$EGG`. Buy `$BREAD` with your `$EGG` and give it to your duckling to make it bigger. A bigger `$DUCK` lays more `$EGG`.
 
 ### Model
 The Smart Duck Farm project is inspired by the [chikn.farm](chikn.farm) project and their [tokenomics model](https://docs.chikn.farm/). 
@@ -31,6 +31,15 @@ The chikn.farm creators have talked about the Bokchain - a VM in the Avalanche n
 ### Limitations
 * This doesn't come with any UI. This project is only the `solidity` smart contracts. I am not planning on building any UI such as the marketplace
 * This is a Proof of Concept (PoC) and no parts of this should be considered "production-ready". Feel free to use as much of the code as you like but make sure you test it and vet it before deploying it to the blockchain.
+
+## Deployment
+### Deploying for development and testing
+The easiest way to deploy the smart contracts and try them out is through the [Remix Online IDE](https://remix.ethereum.org/#lang=en&optimize=false&runs=200&evmVersion=null). It provides an easy-to-use environment and test accounts to mint and buy tokens.
+
+### Deploying in the blockchain
+The project can be deployed to any blockchain that supports Ethereum Smart Contracts. I am a big fan of the [Avalanche](https://www.avax.com/) Network and their [Consensus Protocol](https://www.avalabs.org/whitepapers). They have a a couple of great resources to get started there:
+* [Using Hardhat with the Avalanche C-Chain](https://docs.avax.network/dapps/developer-toolchains/using-hardhat-with-the-avalanche-c-chain)
+* [Deploy a Smart Contract on Avalanche Using Remix and MetaMask](https://docs.avax.network/dapps/smart-contracts/deploy-a-smart-contract-on-avalanche-using-remix-and-metamask)
 
 ## Building & Testing
 ### Requirements
