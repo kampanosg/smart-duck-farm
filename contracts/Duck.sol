@@ -9,14 +9,13 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 contract Duck is ERC721Upgradeable {
+    using EnumerableSet for EnumerableSet.UintSet;
+    using Counters for Counters.Counter;
 
     event DuckMintedEvent(uint256 tokenId, address minter);
     event DuckTransferedEvent(address from, address to, uint256 tokenId);
     event DuckListedEvent(uint256 tokenId, uint256 price);
     event DuckUnlistedEvent(uint256 tokenId);
-
-    using EnumerableSet for EnumerableSet.UintSet;
-    using Counters for Counters.Counter;
 
     string public baseURL;
     uint256 public mintFeeAmount;
