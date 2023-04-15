@@ -10,6 +10,11 @@ import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 contract Duck is ERC721Upgradeable {
 
+    event DuckMintedEvent(uint256 tokenId, address minter);
+    event DuckTransferedEvent(address from, address to, uint256 tokenId);
+    event DuckListedEvent(uint256 tokenId, uint256 price);
+    event DuckUnlistedEvent(uint256 tokenId);
+
     using EnumerableSet for EnumerableSet.UintSet;
     using Counters for Counters.Counter;
 
@@ -48,6 +53,8 @@ contract Duck is ERC721Upgradeable {
         uint256 nextTokenId = _tokenIdCounter.current();
         _safeMint(_msgSender(), nextTokenId);
         ducklings[nextTokenId] = Duckling(nextTokenId, _msgSender(), _msgSender(), 0, false, 0);
+
+        emit DuckMintedEvent(nextTokenId, _msgSender());
     }
 
     function buyToken(uint256 tokenId) public payable {
@@ -61,6 +68,8 @@ contract Duck is ERC721Upgradeable {
         payable(duckling.owner).transfer(msg.value);
 
         _transfer(duckling.owner, _msgSender(), tokenId);
+
+        emit DuckTransferedEvent(duckling.owner, _msgSender(), tokenId);
     }
 
     function listToken(uint256 tokenId, uint256 price) public {
@@ -70,6 +79,8 @@ contract Duck is ERC721Upgradeable {
         ducklings[tokenId].forSale = true;
         ducklings[tokenId].price = price;
         _listedTokens.add(tokenId);
+
+        emit DuckListedEvent(tokenId, price);
     }
 
     function unlistToken(uint256 tokenId) public {
@@ -78,6 +89,8 @@ contract Duck is ERC721Upgradeable {
         ducklings[tokenId].forSale = false;
         ducklings[tokenId].price = 0;
         _listedTokens.remove(tokenId);
+
+        emit DuckUnlistedEvent(tokenId);
     }
 
     function totalSupply() public view returns (uint256) {
