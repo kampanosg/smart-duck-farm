@@ -296,3 +296,33 @@ describe("Duck Contract - getUserTokens", () => {
         expect(userTokens.length).to.be.equal(0);
     });
 });
+
+describe("Duck Contract - setWeight", () => {
+    let duckContract = null;
+    let owner = null;
+    let other = null;
+
+    beforeEach(async () => {
+        [owner, other] = await ethers.getSigners();
+        const Duck = await ethers.getContractFactory("Duck");
+        duckContract = await Duck.deploy();
+        await duckContract.deployed();
+        await duckContract.mint();
+    });
+
+    it("should revert when token is not owned by sender", async () => {
+        await expect(duckContract.connect(other).setWeight(1, 1))
+            .to.be.revertedWith("not the owner");
+    });
+
+    it("should revert when token does not exist", async () => {
+        await expect(duckContract.setWeight(69, 1))
+            .to.be.revertedWith("ERC721: invalid token ID");
+    });
+
+    it("should update token weight", async () => {
+        await duckContract.setWeight(1, 1);
+        const duckling = await duckContract.getDuckling(1);
+        expect(duckling.weight).to.be.equal(1);
+    });
+});
