@@ -7,9 +7,11 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/interfaces/IERC721.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+
+import "./Authorizable.sol";
 import "./Duck.sol";
 
-contract Egg is ERC20 {
+contract Egg is ERC20, Authorizable {
     using SafeMath for uint256;
     using EnumerableSet for EnumerableSet.UintSet;
 
@@ -96,6 +98,11 @@ contract Egg is ERC20 {
             stakedDuck.lastTimeFarmedTs = block.timestamp;
             stakedDucklings[tokenId] = stakedDuck;
         }
+    }
+
+    function burnEgg(address sender, uint256 eggsAmount) external onlyAuthorized {
+        require(balanceOf(sender) >= eggsAmount, "NOT ENOUGH EGG");
+        _burn(sender, eggsAmount);
     }
 
 }
