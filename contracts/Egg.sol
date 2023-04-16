@@ -56,4 +56,31 @@ contract Egg is ERC20 {
         return deltaSeconds * (eggPerDay / ONE_DAY_IN_SECS);
     }
 
+    function stake(uint256 tokenId) external {
+        Duck duck = Duck(DUCK_CONTRACT_ADDR);
+        require(duck.ownerOf(tokenId) == msg.sender, "not the owner");
+
+        (, , , , , uint256 weight) = duck.ducklings(tokenId);
+        StakedDuckling memory stakedDuck = stakedDucklings[tokenId];
+        require(stakedDuck.weight == 0, "already staked");
+
+        uint256 nowTs = block.timestamp;
+        stakedDucklings[tokenId] = StakedDuckling(weight, nowTs, 0, nowTs + cooldownRate(weight));
+    }
+
+    function unstake(uint256 tokenId) external {
+        Duck duck = Duck(DUCK_CONTRACT_ADDR);
+        require(duck.ownerOf(tokenId) == msg.sender, "not the owner");
+
+        StakedDuckling memory stakedDuck = stakedDucklings[tokenId];
+        require(stakedDuck.weight > 0, "not staked");
+
+        uint256 claimable = claimableEgg(tokenId);
+        if (claimable > 0) {
+            _mint(msg.sender, claimable);
+        }
+
+        delete stakedDucklings[tokenId];
+    }
+
 }
