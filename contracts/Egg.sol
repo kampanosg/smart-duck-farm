@@ -100,6 +100,25 @@ contract Egg is ERC20, Authorizable {
         }
     }
 
+    // this could also live in the duck contract
+    // but it's here for convenience since all the other staking logic and data structures are here
+    function upgradeDuck(uint256 tokenId) external {
+        StakedDuckling memory stakedDuck = stakedDucklings[tokenId];
+        require(stakedDuck.weight > 0, "not staked");
+        require(stakedDuck.amountFed >= feedLevelingRate(stakedDuck.weight), "not fed enough");
+        require(block.timestamp >= stakedDuck.cooldownTime, "still cooling down");
+
+        Duck duck = Duck(DUCK_CONTRACT_ADDR);
+        require(duck.ownerOf(tokenId) == msg.sender, "not the owner");
+
+        stakedDuck.weight = stakedDuck.weight + 100;
+        stakedDuck.amountFed = 0;
+        stakedDuck.cooldownTime = block.timestamp + cooldownRate(stakedDuck.weight);
+        stakedDucklings[tokenId] = stakedDuck;
+
+        duck.setWeight(tokenId, stakedDuck.weight);
+    }
+
     function burnEgg(address sender, uint256 eggsAmount) external onlyAuthorized {
         require(balanceOf(sender) >= eggsAmount, "NOT ENOUGH EGG");
         _burn(sender, eggsAmount);
