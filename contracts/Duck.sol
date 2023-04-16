@@ -16,6 +16,7 @@ contract Duck is ERC721Upgradeable {
     event DuckTransferedEvent(address from, address to, uint256 tokenId);
     event DuckListedEvent(uint256 tokenId, uint256 price);
     event DuckUnlistedEvent(uint256 tokenId);
+    event DuckWeightUpdatedEvent(uint256 tokenId, uint256 weight);
 
     string public baseURL;
     uint256 public mintFeeAmount;
@@ -115,6 +116,12 @@ contract Duck is ERC721Upgradeable {
             userTokens[i] = _holderTokens[_wallet].at(i);
         }
         return userTokens;
+    }
+
+    function setWeight(uint256 tokenId, uint256 weight) public {
+        require(_isApprovedOrOwner(_msgSender(), tokenId), "not the owner");
+        ducklings[tokenId].weight = weight;
+        emit DuckWeightUpdatedEvent(tokenId, weight);
     }
 
     function tokenURI(uint256 tokenId) public view override(ERC721Upgradeable) returns (string memory) {
