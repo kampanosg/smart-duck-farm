@@ -79,8 +79,6 @@ describe("Egg Contract - cooldownRate", () => {
 
 describe("Egg Contract - claimableEgg", () => {
 
-    let owner = null;
-    let other = null;
     let duckContract = null;
     let eggContract = null;
 
@@ -112,7 +110,6 @@ describe("Egg Contract - claimableEgg", () => {
 
 describe("Egg Contract - stake", () => {
 
-    let owner = null;
     let other = null;
     let duckContract = null;
     let eggContract = null;
@@ -151,7 +148,6 @@ describe("Egg Contract - stake", () => {
 
 describe("Egg Contract - unstake", () => {
 
-    let owner = null;
     let other = null;
     let duckContract = null;
     let eggContract = null;
@@ -191,7 +187,6 @@ describe("Egg Contract - unstake", () => {
 
 describe("Egg Contract - upgradeDuck", () => {
 
-    let owner = null;
     let other = null;
     let duckContract = null;
     let eggContract = null;
