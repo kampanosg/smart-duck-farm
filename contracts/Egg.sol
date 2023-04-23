@@ -105,6 +105,14 @@ contract Egg is ERC20, Authorizable {
         }
     }
 
+    function feed(uint256 tokenId, uint256 breadAmount) external onlyAuthorized {
+        require(breadAmount > 0, "no feed");
+        StakedDuckling memory duck = stakedDucklings[tokenId];
+        require(duck.weight > 0, "not staked");
+        duck.amountFed = uint48(breadAmount / 1e18) + duck.amountFed;
+        stakedDucklings[tokenId] = duck;
+    }
+
     // this could also live in the duck contract
     // but it's here for convenience since all the other staking logic and data structures are here
     function upgradeDuck(uint256 tokenId) external {

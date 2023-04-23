@@ -1,5 +1,6 @@
 const { assert, expect } = require("chai");
 const { ethers } = require("hardhat");
+const { time } = require("@nomicfoundation/hardhat-network-helpers");
 
 describe("Egg Contract - feedLevellingRate", () => {
 
@@ -152,6 +153,52 @@ describe("Egg Contract - unstake", () => {
         await eggContract.unstake(1);
         const [weight, _ts, _feed, _cooldown] = await eggContract.getStakedDuck(1);
         expect(weight).to.equal(0);
+    });
+
+});
+
+describe("Egg Contract - upgradeDuck", () => {
+
+    let owner = null;
+    let other = null;
+    let duckContract = null;
+    let eggContract = null;
+
+    beforeEach(async () => {
+        [owner, other] = await ethers.getSigners();
+
+        const Duck = await ethers.getContractFactory("Duck");
+        duckContract = await Duck.deploy();
+        await duckContract.deployed();
+
+        const Egg = await ethers.getContractFactory("Egg");
+        eggContract = await Egg.deploy(duckContract.address);
+        await eggContract.deployed();
+
+        await duckContract.mint();
+        duckContract.setWeight(1, 100);
+    });
+
+    it("should revert if not staked", async () => {
+        await expect(eggContract.upgradeDuck(1)).to.be.revertedWith("not staked");
+    });
+
+    it("should revert if not enough feed", async () => {
+        await eggContract.stake(1);
+        await expect(eggContract.upgradeDuck(1)).to.be.revertedWith("not fed enough");
+    });
+
+    it("should revert if not enough time passed", async () => {
+        await eggContract.stake(1);
+        await eggContract.feed(1, ethers.utils.parseEther("100").toBigInt());
+        await expect(eggContract.upgradeDuck(1)).to.be.revertedWith("still cooling down");
+    });
+
+    it("should revert if not the owner", async () => {
+        await eggContract.stake(1);
+        await eggContract.feed(1, ethers.utils.parseEther("100").toBigInt());
+        await time.increase(7200);
+        await expect(eggContract.connect(other).upgradeDuck(1)).to.be.revertedWith("not the owner");
     });
 
 });
