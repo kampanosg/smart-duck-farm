@@ -77,6 +77,38 @@ describe("Egg Contract - cooldownRate", () => {
 
 });
 
+describe("Egg Contract - claimableEgg", () => {
+
+    let owner = null;
+    let other = null;
+    let duckContract = null;
+    let eggContract = null;
+
+    beforeEach(async () => {
+        const Duck = await ethers.getContractFactory("Duck");
+        duckContract = await Duck.deploy();
+        await duckContract.deployed();
+
+        const Egg = await ethers.getContractFactory("Egg");
+        eggContract = await Egg.deploy(duckContract.address);
+        await eggContract.deployed();
+    });
+
+    it("should return 0 if not staked", async () => {
+        const result = await eggContract.claimableEgg(1);
+        assert.equal(result, 0);
+    });
+
+    it("should return the correct amount of eggs", async () => {
+        await duckContract.mint();
+        duckContract.setWeight(1, 100);
+        await eggContract.stake(1);
+        await time.increase(3600);
+        const result = await eggContract.claimableEgg(1);
+        expect(result).to.be.greaterThan(0);
+    });
+
+});
 
 describe("Egg Contract - stake", () => {
 
