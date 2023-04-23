@@ -115,3 +115,43 @@ describe("Egg Contract - stake", () => {
     });
 
 });
+
+describe("Egg Contract - unstake", () => {
+
+    let owner = null;
+    let other = null;
+    let duckContract = null;
+    let eggContract = null;
+
+    beforeEach(async () => {
+        [owner, other] = await ethers.getSigners();
+
+        const Duck = await ethers.getContractFactory("Duck");
+        duckContract = await Duck.deploy();
+        await duckContract.deployed();
+
+        const Egg = await ethers.getContractFactory("Egg");
+        eggContract = await Egg.deploy(duckContract.address);
+        await eggContract.deployed();
+
+        await duckContract.mint();
+        duckContract.setWeight(1, 100);
+    });
+
+    it("should revert if sender is not the owner", async () => {
+        await eggContract.stake(1);
+        await expect(eggContract.connect(other).unstake(1)).to.be.revertedWith("not the owner");
+    });
+
+    it("should revert if not staked", async () => {
+        await expect(eggContract.unstake(1)).to.be.revertedWith("not staked");
+    });
+
+    it("should unstake the duck", async () => {
+        await eggContract.stake(1);
+        await eggContract.unstake(1);
+        const [weight, _ts, _feed, _cooldown] = await eggContract.getStakedDuck(1);
+        expect(weight).to.equal(0);
+    });
+
+});
