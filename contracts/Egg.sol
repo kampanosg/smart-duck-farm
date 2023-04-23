@@ -38,7 +38,7 @@ contract Egg is ERC20, Authorizable {
     }
 
     // calculate the amount of $BREAD required to level up a duck
-    function feedLevelingRate(uint256 kg) public view returns (uint256) {
+    function feedLevellingRate(uint256 kg) public view returns (uint256) {
         return LVL_BASE * ((kg / 100) ** LVL_RATE);
     }
 
@@ -105,7 +105,7 @@ contract Egg is ERC20, Authorizable {
     function upgradeDuck(uint256 tokenId) external {
         StakedDuckling memory stakedDuck = stakedDucklings[tokenId];
         require(stakedDuck.weight > 0, "not staked");
-        require(stakedDuck.amountFed >= feedLevelingRate(stakedDuck.weight), "not fed enough");
+        require(stakedDuck.amountFed >= feedLevellingRate(stakedDuck.weight), "not fed enough");
         require(block.timestamp >= stakedDuck.cooldownTime, "still cooling down");
 
         Duck duck = Duck(DUCK_CONTRACT_ADDR);
