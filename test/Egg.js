@@ -75,3 +75,43 @@ describe("Egg Contract - cooldownRate", () => {
     });
 
 });
+
+
+describe("Egg Contract - stake", () => {
+
+    let owner = null;
+    let other = null;
+    let duckContract = null;
+    let eggContract = null;
+
+    beforeEach(async () => {
+        [owner, other] = await ethers.getSigners();
+
+        const Duck = await ethers.getContractFactory("Duck");
+        duckContract = await Duck.deploy();
+        await duckContract.deployed();
+
+        const Egg = await ethers.getContractFactory("Egg");
+        eggContract = await Egg.deploy(duckContract.address);
+        await eggContract.deployed();
+
+        await duckContract.mint();
+        duckContract.setWeight(1, 100);
+    });
+
+    it("should revert if sender is not the owner", async () => {
+        await expect(eggContract.connect(other).stake(1)).to.be.revertedWith("not the owner");
+    });
+
+    it("should revert if already staked", async () => {
+        await eggContract.stake(1);
+        await expect(eggContract.stake(1)).to.be.revertedWith("already staked");
+    });
+
+    it("should stake the duck", async () => {
+        await eggContract.stake(1);
+        const [weight, _ts, _feed, _cooldown] = await eggContract.getStakedDuck(1);
+        expect(weight).to.be.greaterThan(0);
+    });
+
+});

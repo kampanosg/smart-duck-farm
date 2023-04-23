@@ -37,6 +37,11 @@ contract Egg is ERC20, Authorizable {
         DUCK_CONTRACT_ADDR = _duckContractAddr;
     }
 
+    function getStakedDuck(uint256 tokenId) public view returns (uint256, uint256, uint256, uint256) {
+        StakedDuckling memory stakedDuckling = stakedDucklings[tokenId];
+        return (stakedDuckling.weight, stakedDuckling.lastTimeFarmedTs, stakedDuckling.amountFed, stakedDuckling.cooldownTime);
+    }
+
     // calculate the amount of $BREAD required to level up a duck
     function feedLevellingRate(uint256 kg) public view returns (uint256) {
         return LVL_BASE * ((kg / 100) ** LVL_RATE);
