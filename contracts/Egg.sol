@@ -1,4 +1,4 @@
-// contracts/Duck.sol
+// contracts/Egg.sol
 // SPDX-License-Identifier: MIT
 // an eggy contract
 pragma solidity ^0.8.0;
