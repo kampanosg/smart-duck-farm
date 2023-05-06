@@ -137,4 +137,8 @@ contract Egg is ERC20, Authorizable {
         _burn(sender, eggsAmount);
     }
 
+    function mintEgg(address sender, uint256 eggsAmount) external onlyAuthorized {
+        _mint(sender, eggsAmount);
+    }
+
 }

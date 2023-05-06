@@ -14,6 +14,7 @@ import "./Egg.sol";
 contract Bread is ERC20, Authorizable {
     using SafeMath for uint256;
 
+    uint256 public MAX_FEED_SUPPLY = 32000000000000000000000000000;
     address public DUCK_CONTRACT_ADDR;
     address public EGG_CONTRACT_ADDR;
     uint256 public BOOSTER_MULTIPLIER = 1;
@@ -56,6 +57,32 @@ contract Bread is ERC20, Authorizable {
         Stake memory s = stakes[user];
         require(s.user != address(0), "not staked");
         return ((s.amount * FEED_FARMING_FACTOR) * (((block.timestamp - s.ts) * 10000000000) / 86400) * BOOSTER_MULTIPLIER) / 10000000000;
+    }
+
+     function unstakeEgg(uint256 amount) external {
+        require(amount > 0, "no egg");
+        Stake memory s = stakes[msg.sender];
+        require(s.user != address(0), "not staked");
+        require(amount <= s.amount, "not enough egg");
+        Egg eggContract = Egg(EGG_CONTRACT_ADDR);
+        updateStake(msg.sender, s.amount - amount);
+        uint256 breakageFee = (amount * 11) / 12;
+        eggContract.mintEgg(msg.sender, breakageFee);
+    }
+
+    function claimFeed() external {
+        uint256 claimable = claimableFeed(msg.sender);
+        require(claimable > 0, "no feed");
+
+        Stake memory s = stakes[msg.sender];
+        updateStake(msg.sender, s.amount);
+
+        mintFeed(msg.sender, claimable);
+    }
+
+    function mintFeed(address sender, uint256 feedAmount) internal {
+        require(totalSupply() + feedAmount < MAX_FEED_SUPPLY, "over max supply");
+        _mint(sender, feedAmount);
     }
 
 }
