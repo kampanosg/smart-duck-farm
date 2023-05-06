@@ -15,6 +15,7 @@ contract Bread is ERC20, Authorizable {
     using SafeMath for uint256;
 
     uint256 public MAX_FEED_SUPPLY = 32000000000000000000000000000;
+    uint256 public FEED_SWAP_FACTOR = 12;
     address public DUCK_CONTRACT_ADDR;
     address public EGG_CONTRACT_ADDR;
     uint256 public BOOSTER_MULTIPLIER = 1;
@@ -83,6 +84,31 @@ contract Bread is ERC20, Authorizable {
     function mintFeed(address sender, uint256 feedAmount) internal {
         require(totalSupply() + feedAmount < MAX_FEED_SUPPLY, "over max supply");
         _mint(sender, feedAmount);
+    }
+
+    function swapEggForBread(uint256 eggAmount) external {
+        require(eggAmount > 0, "no egg");
+
+        Egg eggContract = Egg(EGG_CONTRACT_ADDR);
+        eggContract.burnEgg(msg.sender, eggAmount);
+
+        _mint(msg.sender, eggAmount * FEED_SWAP_FACTOR);
+    }
+
+    function feedDuck(uint256 duckID, uint256 amount) external {
+        require(amount > 0, "no feed");
+
+        IERC721 instance = IERC721(DUCK_CONTRACT_ADDR);
+
+        require(instance.ownerOf(duckID) == msg.sender, "not the owner");
+        require(balanceOf(msg.sender) >= amount, "not enough fee");
+
+        Egg eggContract = Egg(EGG_CONTRACT_ADDR);
+        (uint256 kg, , , ) = eggContract.getStakedDuck(duckID);
+        require(kg > 0, "not staked");
+
+        _burn(msg.sender, amount);
+        eggContract.feed(duckID, amount);
     }
 
 }
