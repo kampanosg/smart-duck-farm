@@ -16,6 +16,8 @@ contract Bread is ERC20, Authorizable {
 
     address public DUCK_CONTRACT_ADDR;
     address public EGG_CONTRACT_ADDR;
+    uint256 public BOOSTER_MULTIPLIER = 1;
+    uint256 public FEED_FARMING_FACTOR = 3;
 
     struct Stake {
         address user;
@@ -47,12 +49,13 @@ contract Bread is ERC20, Authorizable {
     }
 
     function updateStake(address user, uint256 amount) internal {
-        Stake s = Stake {
-            user: user,
-            amount: amount,
-            ts: block.timestamp
-        };
-        stakes[user] = s;
+        stakes[user] = Stake(user, amount, block.timestamp);
+    }
+
+    function claimableFeed(address user) public view returns (uint256) {
+        Stake memory s = stakes[user];
+        require(s.user != address(0), "not staked");
+        return ((s.amount * FEED_FARMING_FACTOR) * (((block.timestamp - s.ts) * 10000000000) / 86400) * BOOSTER_MULTIPLIER) / 10000000000;
     }
 
 }
