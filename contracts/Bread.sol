@@ -14,6 +14,12 @@ import "./Egg.sol";
 contract Bread is ERC20, Authorizable {
     using SafeMath for uint256;
 
+    event EggStakedEvent(address, uint256);
+    event EggUnstakedEvent(address, uint256);
+    event ClaimedFeedEvent(address, uint256);
+    event SwappedEggForBreadEvent(address, uint256);
+    event DuckFedEvent(address, uint256, uint256);
+
     uint256 public MAX_FEED_SUPPLY = 32000000000000000000000000000;
     uint256 public FEED_SWAP_FACTOR = 12;
     address public DUCK_CONTRACT_ADDR;
@@ -48,6 +54,8 @@ contract Bread is ERC20, Authorizable {
             updateStake(msg.sender, amount);
         }
         eggContract.burnEgg(msg.sender, amount);
+
+        emit EggStakedEvent(msg.sender, amount);
     }
 
     function updateStake(address user, uint256 amount) internal {
@@ -69,6 +77,8 @@ contract Bread is ERC20, Authorizable {
         updateStake(msg.sender, s.amount - amount);
         uint256 breakageFee = (amount * 11) / 12;
         eggContract.mintEgg(msg.sender, breakageFee);
+
+        emit EggUnstakedEvent(msg.sender, amount);
     }
 
     function claimFeed() external {
@@ -79,6 +89,8 @@ contract Bread is ERC20, Authorizable {
         updateStake(msg.sender, s.amount);
 
         mintFeed(msg.sender, claimable);
+
+        emit ClaimedFeedEvent(msg.sender, claimable);
     }
 
     function mintFeed(address sender, uint256 feedAmount) internal {
@@ -93,22 +105,26 @@ contract Bread is ERC20, Authorizable {
         eggContract.burnEgg(msg.sender, eggAmount);
 
         _mint(msg.sender, eggAmount * FEED_SWAP_FACTOR);
+
+        emit SwappedEggForBreadEvent(msg.sender, eggAmount);
     }
 
-    function feedDuck(uint256 duckID, uint256 amount) external {
+    function feedDuck(uint256 duckId, uint256 amount) external {
         require(amount > 0, "no feed");
 
         IERC721 instance = IERC721(DUCK_CONTRACT_ADDR);
 
-        require(instance.ownerOf(duckID) == msg.sender, "not the owner");
+        require(instance.ownerOf(duckId) == msg.sender, "not the owner");
         require(balanceOf(msg.sender) >= amount, "not enough fee");
 
         Egg eggContract = Egg(EGG_CONTRACT_ADDR);
-        (uint256 kg, , , ) = eggContract.getStakedDuck(duckID);
+        (uint256 kg, , , ) = eggContract.getStakedDuck(duckId);
         require(kg > 0, "not staked");
 
         _burn(msg.sender, amount);
-        eggContract.feed(duckID, amount);
+        eggContract.feed(duckId, amount);
+
+        emit DuckFedEvent(msg.sender, duckId, amount);
     }
 
 }
