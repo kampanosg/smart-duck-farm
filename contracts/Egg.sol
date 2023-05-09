@@ -15,6 +15,12 @@ contract Egg is ERC20, Authorizable {
     using SafeMath for uint256;
     using EnumerableSet for EnumerableSet.UintSet;
 
+    event EggStakedEvent(uint256);
+    event EggUnstakedEvent(uint256);
+    event EggClaimedEvent(uint256, uint256);
+    event DucklingFedEvent(uint256, uint256);
+    event DuckUpgradedEvent(uint256, uint256);
+
     address public DUCK_CONTRACT_ADDR;
 
     uint256 public LVL_BASE = 25;
@@ -73,6 +79,7 @@ contract Egg is ERC20, Authorizable {
 
         uint256 nowTs = block.timestamp;
         stakedDucklings[tokenId] = StakedDuckling(weight, nowTs, 0, nowTs + cooldownRate(weight));
+        emit EggStakedEvent(tokenId);
     }
 
     function unstake(uint256 tokenId) external {
@@ -88,6 +95,7 @@ contract Egg is ERC20, Authorizable {
         }
 
         delete stakedDucklings[tokenId];
+        emit EggUnstakedEvent(tokenId);
     }
 
     function claimEgg(uint256 tokenId) external{
@@ -103,6 +111,7 @@ contract Egg is ERC20, Authorizable {
             stakedDuck.lastTimeFarmedTs = block.timestamp;
             stakedDucklings[tokenId] = stakedDuck;
         }
+        emit EggClaimedEvent(tokenId, claimable);
     }
 
     function feed(uint256 tokenId, uint256 breadAmount) external onlyAuthorized {
@@ -111,6 +120,7 @@ contract Egg is ERC20, Authorizable {
         require(duck.weight > 0, "not staked");
         duck.amountFed = uint48(breadAmount / 1e18) + duck.amountFed;
         stakedDucklings[tokenId] = duck;
+        emit DucklingFedEvent(tokenId, breadAmount);
     }
 
     // this could also live in the duck contract
@@ -130,6 +140,7 @@ contract Egg is ERC20, Authorizable {
         stakedDucklings[tokenId] = stakedDuck;
 
         duck.setWeight(tokenId, stakedDuck.weight);
+        emit DuckUpgradedEvent(tokenId, stakedDuck.weight);
     }
 
     function burnEgg(address sender, uint256 eggsAmount) external onlyAuthorized {
