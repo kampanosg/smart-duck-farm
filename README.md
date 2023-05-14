@@ -66,3 +66,7 @@ Again, if you don't like `make`, run them with Hardhat
 ```
 npx hardhat test
 ```
+
+<p align="center">
+  <img src="https://media.giphy.com/media/krewXUB6LBja/giphy.gif" />
+</p>
